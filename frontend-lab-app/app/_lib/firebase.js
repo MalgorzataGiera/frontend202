@@ -1,16 +1,17 @@
 import { initializeApp } from "firebase/app";
-import { getAnalytics, isSupported } from 'firebase/analytics';
+import { getAnalytics, isSupported } from "firebase/analytics";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDGrs2_lpJBM3FiTIvIPPi8W1o11B81sO0",
-  authDomain: "frontendapp-e6133.firebaseapp.com",
-  projectId: "frontendapp-e6133",
-  storageBucket: "frontendapp-e6133.firebasestorage.app",
-  messagingSenderId: "373317044702",
-  appId: "1:373317044702:web:a0264b4d729b304f76354f",
-  measurementId: "G-Z7VJVD7J5J"
+  apiKey: process.env.NEXT_PUBLIC_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_MEASUREMENT_ID,
 };
 
+// Inicjalizacja Firebase
 const app = initializeApp(firebaseConfig);
 
 let analytics = null;
