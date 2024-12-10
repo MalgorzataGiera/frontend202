@@ -12,7 +12,8 @@ function Protected({ children }) {
     useLayoutEffect(() => {
         // Jeśli użytkownik nie jest zalogowany
         if (!user) {
-            redirect(`/user/signin?returnUrl=${returnUrl}`);
+            // redirect(`/user/signin?returnUrl=${returnUrl}`);
+            const redirectUrl = returnUrl ? `/user/signin?returnUrl=${returnUrl}` : "/";
         }
     }, [user, returnUrl]);
 
