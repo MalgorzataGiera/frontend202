@@ -39,7 +39,7 @@ export default function RegisterForm() {
           sendEmailVerification(auth.currentUser)
             .then(() => {
               console.log("Wysłano e-mail weryfikacyjny!");
-              router.push("/protected/user/profile");
+              router.push("/verify");
             });
         })
         .catch((error) => {
