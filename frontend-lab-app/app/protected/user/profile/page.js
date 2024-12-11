@@ -4,6 +4,8 @@ import { useAuth } from '@/app/_lib/AuthContext';
 import { useRouter } from 'next/navigation';
 import { getDoc, doc, setDoc } from 'firebase/firestore';
 import { db } from '@/app/_lib/firebase';
+import { updateProfile } from 'firebase/auth';
+
 
 export default function Profile() {
   const { user } = useAuth(); 
@@ -62,6 +64,25 @@ export default function Profile() {
           zipCode: address.zipCode,
         },
       });
+
+    // Aktualizacja w Firebase Authentication
+    const profileUpdates = {};
+    
+    if (user) {
+      const updates = {};
+
+      if (displayName && displayName !== user.displayName) {
+        profileUpdates.displayName = displayName;
+      }
+  
+      if (photoURL && photoURL !== user.photoURL) {
+        profileUpdates.photoURL = photoURL;
+      }
+  
+      if (Object.keys(profileUpdates).length > 0) {
+        updateProfile(user, profileUpdates);
+      }
+    }
       setError('');
     } catch (error) {
       console.error('Błąd podczas zapisywania danych:', error);

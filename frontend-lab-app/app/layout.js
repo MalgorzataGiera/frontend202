@@ -9,12 +9,7 @@ export default function Layout({ children }) {
         <body>
           <div className="layout-container">
             <nav className="sidebar">
-              <ul>
-                <li><a href="/"><i className="icon">🏠</i> Strona Główna</a></li>
-                <li><a href="/about"><i className="icon">ℹ️</i> O nas</a></li>
-                <li><a href="/services"><i className="icon">🛠️</i> Usługi</a></li>
-                <li><a href="/contact"><i className="icon">📞</i> Kontakt</a></li>
-              </ul>
+            <SidebarLinks />
             </nav>
 
             <div className="main-content">
@@ -38,7 +33,7 @@ export default function Layout({ children }) {
 }
 
 function AuthLinks() {
-  const { user, logout } = useAuth(); // Pobieranie stanu zalogowania i funkcji wylogowania
+  const { user, logout } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -64,5 +59,21 @@ function AuthLinks() {
       <a href="/signin">Logowanie</a>
       <a href="/register">Rejestracja</a>
     </>
+  );
+}
+
+function SidebarLinks() {
+  const { user } = useAuth();
+
+  return (
+    <ul>
+      <li><a href="/"><i className="icon">🏠</i> Strona Główna</a></li>
+      <li><a href="/about"><i className="icon">ℹ️</i> O nas</a></li>
+      <li><a href="/services"><i className="icon">🛠️</i> Usługi</a></li>
+      <li><a href="/contact"><i className="icon">📞</i> Kontakt</a></li>
+      {user && ( // Jeśli użytkownik jest zalogowany, wyświetl link do profilu
+        <li><a href="/protected/user/profile"><i className="icon">👤</i> Profil</a></li>
+      )}
+    </ul>
   );
 }
