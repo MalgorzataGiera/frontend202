@@ -2,7 +2,6 @@
 
 import { useAuth } from "../_lib/AuthContext";
 import { useLayoutEffect } from "react";
-import { redirect } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 
 function Protected({ children }) {
@@ -10,7 +9,6 @@ function Protected({ children }) {
     const returnUrl = usePathname(); // ścieżka do której użytkownik próbuje uzyskać dostęp
 
     useLayoutEffect(() => {
-        // Jeśli użytkownik nie jest zalogowany
         if (!user) {
             // redirect(`/user/signin?returnUrl=${returnUrl}`);
             const redirectUrl = returnUrl ? `/user/signin?returnUrl=${returnUrl}` : "/";

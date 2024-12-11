@@ -1,4 +1,5 @@
-import { AuthProvider } from '@/app/_lib/AuthContext';
+'use client'
+import { AuthProvider, useAuth } from '@/app/_lib/AuthContext';
 import './styles/globals.css';
 
 export default function Layout({ children }) {
@@ -19,8 +20,7 @@ export default function Layout({ children }) {
             <div className="main-content">
               <header className="header">
                 <div className="auth-links">
-                  <a href="/signin">Logowanie</a>
-                  <a href="/register">Rejestracja</a>
+                <AuthLinks /> 
                 </div>
               </header>
 
@@ -34,5 +34,35 @@ export default function Layout({ children }) {
         </body>
       </html>
     </AuthProvider>
+  );
+}
+
+function AuthLinks() {
+  const { user, logout } = useAuth(); // Pobieranie stanu zalogowania i funkcji wylogowania
+
+  const handleLogout = async () => {
+    try {
+      await logout(); // Wywołanie funkcji wylogowania z AuthContext
+      console.log('Wylogowano pomyślnie');
+    } catch (error) {
+      console.error('Błąd podczas wylogowywania:', error);
+    }
+  };
+
+  if (user) {
+    // Użytkownik jest zalogowany
+    return (
+      <a href="/protected/user/signout" onClick={handleLogout}>
+        Wyloguj
+      </a>
+    );
+  }
+
+  // Użytkownik nie jest zalogowany
+  return (
+    <>
+      <a href="/signin">Logowanie</a>
+      <a href="/register">Rejestracja</a>
+    </>
   );
 }

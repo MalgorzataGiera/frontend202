@@ -1,6 +1,19 @@
+'use client'
 import Image from "next/image";
+import { useAuth } from '@/app/_lib/AuthContext';
+import { useRouter } from 'next/navigation';
+
 
 export default function Home() {
+  const { user } = useAuth();
+  const router = useRouter();
+
+  // Jeśli użytkownik nie jest zalogowany, przekieruj go na stronę logowania
+  if (!user) {
+    // router.push('/login');
+    console.log('nie zalogowano - home')
+  }
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">

@@ -1,50 +1,88 @@
 'use client';
-
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/app/_lib/AuthContext'; // Aby uzyskać dane użytkownika
-import { updateProfile } from 'firebase/auth'; // Funkcja do aktualizacji profilu
+import { useAuth } from '@/app/_lib/AuthContext'; 
 import { useRouter } from 'next/navigation';
+import { getDoc, doc, setDoc } from 'firebase/firestore';
+import { db } from '@/app/_lib/firebase';
 
 export default function Profile() {
-  const { user } = useAuth(); // Uzyskanie aktualnego użytkownika z kontekstu
-  const [displayName, setDisplayName] = useState(user?.displayName || ''); // Stan na nazwę wyświetlaną
-  const [photoURL, setPhotoURL] = useState(user?.photoURL || ''); // Stan na URL zdjęcia profilowego
-  const [error, setError] = useState(''); // Stan do obsługi błędów
-  const [loading, setLoading] = useState(false); // Stan ładowania formularza
+  const { user } = useAuth(); 
+  const [displayName, setDisplayName] = useState(user?.displayName || ''); 
+  const [photoURL, setPhotoURL] = useState(user?.photoURL || ''); 
+  const [address, setAddress] = useState({
+    city: '',
+    street: '',
+    zipCode: '',
+  });
+  const [error, setError] = useState(''); 
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
- 
+
 
   useEffect(() => {
-    if (!user) {
-      // Jeśli użytkownik nie jest zalogowany, przekierowujemy go na stronę logowania
-      router.push('/user/signin');
+    if (user) {
+      // Pobieramy dane użytkownika z Firestore
+      const fetchData = async () => {
+        try {
+          const snapshot = await getDoc(doc(db, 'users', user.uid));
+          if (snapshot.exists()) {
+            const userData = snapshot.data();
+            setAddress(userData.address);
+          } else {
+            console.log('Brak danych użytkownika');
+          }
+        } catch (error) {
+          console.error('Błąd podczas pobierania danych:', error);
+          setError('Wystąpił błąd przy pobieraniu danych');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchData();
+    } else {
+      setLoading(false);
     }
-  }, [user, router]);
+  }, [user]);
+
 
   const onSubmit = (event) => {
     event.preventDefault();
-    setLoading(true);
-    setError(''); // Resetowanie błędów przed próbą aktualizacji
+    if (!address.city || !address.street || !address.zipCode) {
+      setError('Wszystkie pola muszą być wypełnione');
+      return;
+    }
 
-    updateProfile(user, {
-      displayName,
-      photoURL,
-    })
-      .then(() => {
-        console.log('Profile updated');
-        setLoading(false);
-      })
-      .catch((error) => {
-        setError(error.message);
-        setLoading(false);
+    // Zapisanie danych w Firestore
+    try {
+      setDoc(doc(db, 'users', user.uid), {
+        address: {
+          city: address.city,
+          street: address.street,
+          zipCode: address.zipCode,
+        },
       });
+      setError('');
+    } catch (error) {
+      console.error('Błąd podczas zapisywania danych:', error);
+      setError('Wystąpił błąd przy zapisywaniu danych');
+    }
   };
+
+  if (loading) {
+    return <div>Ładowanie...</div>;
+  }
+
+  if (!user) {
+    return <div>Musisz być zalogowany, aby edytować profil.</div>;
+  }
+  
+
 
   return (
     <div className="form-container">
       <h2>Profil użytkownika</h2>
-      
-      {/* Warunkowe renderowanie błędu */}
+
       {error && <p className="error">{error}</p>}
 
       <form onSubmit={onSubmit}>
@@ -64,7 +102,7 @@ export default function Profile() {
           <input
             type="email"
             id="email"
-            value={user?.email} // E-mail tylko do odczytu
+            value={user?.email}
             readOnly
           />
         </div>
@@ -78,12 +116,56 @@ export default function Profile() {
             onChange={(e) => setPhotoURL(e.target.value)}
           />
         </div>
+
+        <div>
+          <label htmlFor="city">Miasto:</label>
+          <input
+            type="text"
+            id="city"
+            value={address.city}
+            onChange={(e) =>
+              setAddress((prev) => ({ ...prev, city: e.target.value }))
+            }
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="street">Ulica:</label>
+          <input
+            type="text"
+            id="street"
+            value={address.street}
+            onChange={(e) =>
+              setAddress((prev) => ({ ...prev, street: e.target.value }))
+            }
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="zipCode">Kod pocztowy:</label>
+          <input
+            type="text"
+            id="zipCode"
+            value={address.zipCode}
+            onChange={(e) =>
+              setAddress((prev) => ({ ...prev, zipCode: e.target.value }))
+            }
+            required
+          />
+        </div>
         {photoURL && <img src={photoURL} alt="Profile" width="100" height="100" />}
 
         <button type="submit" disabled={loading}>
           {loading ? 'Aktualizowanie...' : 'Zaktualizuj profil'}
         </button>
+
+        <div className="order-link">
+        <p>Chcesz zobaczyć swoje zamówienia? <a href="/protected/user/orders">Kliknij tutaj</a></p>
+      </div>
       </form>
     </div>
+    
   );
 }

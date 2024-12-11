@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword, setPersistence, browserSessionPersistence, getAuth } from 'firebase/auth';
 import { useSearchParams } from 'next/navigation';
+import { useAuth } from '@/app/_lib/AuthContext';
 
 export default function SignIn() {
+  const { user } = useAuth()
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -13,10 +15,12 @@ export default function SignIn() {
   const auth = getAuth();
   const params = useSearchParams();
   const returnUrl = params.get('returnUrl') || '/protected/user/profile';
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
+    setLoading(true);
 
     try {
       // Ustawia sesję
@@ -24,7 +28,6 @@ export default function SignIn() {
 
       await signInWithEmailAndPassword(auth, email, password);
       
-      // Przekierowuje na stronę
       router.push(returnUrl);
     } catch (err) {
       setError('Błąd logowania. Sprawdź dane i spróbuj ponownie.');
@@ -57,6 +60,7 @@ export default function SignIn() {
           />
         </div>
         <button type="submit">Zaloguj się</button>
+        
       </form>
     </div>
   );

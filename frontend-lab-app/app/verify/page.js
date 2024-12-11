@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/app/_lib/AuthContext'; // Uzyskanie użytkownika z kontekstu
+import { useAuth } from '@/app/_lib/AuthContext';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAuth, signOut } from 'firebase/auth';

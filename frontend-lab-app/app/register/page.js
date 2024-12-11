@@ -8,22 +8,16 @@ import { useAuth } from '@/app/_lib/AuthContext';
 export default function RegisterForm() {
   const { user } = useAuth();
   const router = useRouter();
-  
-  // if (user) {
-  //   return null; // Jeśli użytkownik jest już zalogowany, nie pokazuje formularza rejestracji
-  // }
-
   const auth = getAuth();
 
   const [registerError, setRegisterError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  
+
   const onSubmit = async (e) => {
     e.preventDefault();
     
-    // Sprawdzamy, czy hasła się zgadzają
     if (password !== confirmPassword) {
       setRegisterError("Hasła muszą się zgadzać.");
       return;

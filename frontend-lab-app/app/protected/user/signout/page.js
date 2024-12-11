@@ -12,7 +12,7 @@ export default function LogoutForm() {
         event.preventDefault();
         signOut(auth)
             .then(() => {
-                router.push("/"); // Przekierowanie na strone glowna po wylogowaniu
+                router.push("/"); // Przekierowanie na strone glowna
             })
             .catch((error) => {
                 console.error("Błąd podczas wylogowywania:", error.message);
