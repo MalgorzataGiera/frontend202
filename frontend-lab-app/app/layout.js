@@ -1,6 +1,7 @@
 'use client'
 import { AuthProvider, useAuth } from '@/app/_lib/AuthContext';
 import './styles/globals.css';
+import Link from 'next/link';
 
 export default function Layout({ children }) {
   return (
@@ -47,17 +48,17 @@ function AuthLinks() {
   if (user) {
     // Użytkownik jest zalogowany
     return (
-      <a href="/protected/user/signout" onClick={handleLogout}>
+      <Link href="/protected/user/signout">
         Wyloguj
-      </a>
+      </Link>
     );
   }
 
   // Użytkownik nie jest zalogowany
   return (
     <>
-      <a href="/signin">Logowanie</a>
-      <a href="/register">Rejestracja</a>
+      <Link href="/signin">Logowanie</Link>
+      <Link href="/register">Rejestracja</Link>
     </>
   );
 }
@@ -67,12 +68,12 @@ function SidebarLinks() {
 
   return (
     <ul>
-      <li><a href="/"><i className="icon">🏠</i> Strona Główna</a></li>
-      <li><a href="/about"><i className="icon">ℹ️</i> O nas</a></li>
-      <li><a href="/services"><i className="icon">🛠️</i> Usługi</a></li>
-      <li><a href="/contact"><i className="icon">📞</i> Kontakt</a></li>
+      <li><Link href="/"><i className="icon">🏠</i> Strona Główna</Link></li>
+      <li><Link href="/about"><i className="icon">ℹ️</i> O nas</Link></li>
+      <li><Link href="/services"><i className="icon">🛠️</i> Usługi</Link></li>
+      <li><Link href="/contact"><i className="icon">📞</i> Kontakt</Link></li>
       {user && ( // Jeśli użytkownik jest zalogowany, wyświetl link do profilu
-        <li><a href="/protected/user/profile"><i className="icon">👤</i> Profil</a></li>
+        <li><Link href="/protected/user/profile"><i className="icon">👤</i> Profil</Link></li>
       )}
     </ul>
   );

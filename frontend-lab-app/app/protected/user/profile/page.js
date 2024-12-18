@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getDoc, doc, setDoc } from 'firebase/firestore';
 import { db } from '@/app/_lib/firebase';
 import { updateProfile } from 'firebase/auth';
-
+import Link from 'next/link';
 
 export default function Profile() {
   const { user } = useAuth(); 
@@ -20,8 +20,12 @@ export default function Profile() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-
   useEffect(() => {
+    if (!user) {
+      router.push('/signin');
+      // return <div>Musisz być zalogowany, aby edytować profil.</div>;
+    }  
+
     if (user) {
       // Pobieramy dane użytkownika z Firestore
       const fetchData = async () => {
@@ -45,7 +49,7 @@ export default function Profile() {
     } else {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, router]);
 
 
   const onSubmit = (event) => {
@@ -94,12 +98,7 @@ export default function Profile() {
     return <div>Ładowanie...</div>;
   }
 
-  if (!user) {
-    return <div>Musisz być zalogowany, aby edytować profil.</div>;
-  }
   
-
-
   return (
     <div className="form-container">
       <h2>Profil użytkownika</h2>
@@ -183,7 +182,7 @@ export default function Profile() {
         </button>
 
         <div className="order-link">
-        <p>Chcesz zobaczyć swoje zamówienia? <a href="/protected/user/orders">Kliknij tutaj</a></p>
+        <p>Chcesz zobaczyć swoje zamówienia? <Link href="/protected/user/orders">Kliknij tutaj</Link></p>
       </div>
       </form>
     </div>

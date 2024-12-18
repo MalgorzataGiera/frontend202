@@ -16,7 +16,6 @@ export const AuthProvider = ({ children }) => {
 
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      console.log('zalogowany na poczatku');
       setUser(JSON.parse(storedUser));  // Ustawiamy użytkownika na podstawie localStorage
     }
 

@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword, setPersistence, browserSessionPersistence, getAuth } from 'firebase/auth';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/app/_lib/AuthContext';
 
-export default function SignIn() {
+function SignInForm() {
   const { user } = useAuth()
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -63,5 +63,13 @@ export default function SignIn() {
         
       </form>
     </div>
+  );
+}
+
+export default function SignIn() {
+  return (
+    <Suspense fallback={<div>Ładowanie...</div>}>
+      <SignInForm />
+    </Suspense>
   );
 }
