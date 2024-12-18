@@ -1,191 +1,67 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/app/_lib/AuthContext'; 
+import { useEffect, useState } from 'react';
+import { useAuth } from '@/app/_lib/AuthContext';
 import { useRouter } from 'next/navigation';
-import { getDoc, doc, setDoc } from 'firebase/firestore';
-import { db } from '@/app/_lib/firebase';
-import { updateProfile } from 'firebase/auth';
 import Link from 'next/link';
+import './profile.css'
 
 export default function Profile() {
-  const { user } = useAuth(); 
-  const [displayName, setDisplayName] = useState(user?.displayName || ''); 
-  const [photoURL, setPhotoURL] = useState(user?.photoURL || ''); 
-  const [address, setAddress] = useState({
-    city: '',
-    street: '',
-    zipCode: '',
-  });
-  const [error, setError] = useState(''); 
-  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
   const router = useRouter();
+  const [alertMessage, setAlertMessage] = useState('');
+  const [hideAlert, setHideAlert] = useState(false);
 
   useEffect(() => {
-    if (!user) {
-      router.push('/signin');
-      // return <div>Musisz być zalogowany, aby edytować profil.</div>;
-    }  
+    // Odczytujemy komunikat o zaktualizowaniu profilu z localStorage
+    const message = localStorage.getItem('profileUpdated');
+    if (message) {
+    setAlertMessage(message);
 
-    if (user) {
-      // Pobieramy dane użytkownika z Firestore
-      const fetchData = async () => {
-        try {
-          const snapshot = await getDoc(doc(db, 'users', user.uid));
-          if (snapshot.exists()) {
-            const userData = snapshot.data();
-            setAddress(userData.address);
-          } else {
-            console.log('Brak danych użytkownika');
-          }
-        } catch (error) {
-          console.error('Błąd podczas pobierania danych:', error);
-          setError('Wystąpił błąd przy pobieraniu danych');
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchData();
-    } else {
-      setLoading(false);
+    setTimeout(() => {
+        setHideAlert(true); // Zmieniamy stan na ukrycie alertu
+        setTimeout(() => {
+          setAlertMessage('');
+          setHideAlert(false); // Resetujemy stan alertu po 1 sekundzie (czas animacji)
+          localStorage.removeItem('profileUpdated');
+        }, 2500); // Usuwamy alert po zakończeniu animacji
+      }, 3000);
     }
-  }, [user, router]);
+  }, []);
 
-
-  const onSubmit = (event) => {
-    event.preventDefault();
-    if (!address.city || !address.street || !address.zipCode) {
-      setError('Wszystkie pola muszą być wypełnione');
-      return;
-    }
-
-    // Zapisanie danych w Firestore
-    try {
-      setDoc(doc(db, 'users', user.uid), {
-        address: {
-          city: address.city,
-          street: address.street,
-          zipCode: address.zipCode,
-        },
-      });
-
-    // Aktualizacja w Firebase Authentication
-    const profileUpdates = {};
-    
-    if (user) {
-      const updates = {};
-
-      if (displayName && displayName !== user.displayName) {
-        profileUpdates.displayName = displayName;
-      }
-  
-      if (photoURL && photoURL !== user.photoURL) {
-        profileUpdates.photoURL = photoURL;
-      }
-  
-      if (Object.keys(profileUpdates).length > 0) {
-        updateProfile(user, profileUpdates);
-      }
-    }
-      setError('');
-    } catch (error) {
-      console.error('Błąd podczas zapisywania danych:', error);
-      setError('Wystąpił błąd przy zapisywaniu danych');
-    }
-  };
-
-  if (loading) {
-    return <div>Ładowanie...</div>;
+  if (!user) {
+    router.push('/signin');
+    return <div>Musisz być zalogowany, aby zobaczyć swój profil.</div>;
   }
 
-  
   return (
-    <div className="form-container">
+    <div className="profile-container">
       <h2>Profil użytkownika</h2>
-
-      {error && <p className="error">{error}</p>}
-
-      <form onSubmit={onSubmit}>
-        <div className="input-group">
-          <label htmlFor="displayName">Nazwa użytkownika</label>
-          <input
-            type="text"
-            id="displayName"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="input-group">
-          <label htmlFor="email">E-mail</label>
-          <input
-            type="email"
-            id="email"
-            value={user?.email}
-            readOnly
-          />
-        </div>
-
-        <div className="input-group">
-          <label htmlFor="photoURL">Zdjęcie profilowe - załącz plik</label>
-          <input
-            type="text"
-            id="photoURL"
-            value={photoURL}
-            onChange={(e) => setPhotoURL(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="city">Miasto:</label>
-          <input
-            type="text"
-            id="city"
-            value={address.city}
-            onChange={(e) =>
-              setAddress((prev) => ({ ...prev, city: e.target.value }))
-            }
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="street">Ulica:</label>
-          <input
-            type="text"
-            id="street"
-            value={address.street}
-            onChange={(e) =>
-              setAddress((prev) => ({ ...prev, street: e.target.value }))
-            }
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="zipCode">Kod pocztowy:</label>
-          <input
-            type="text"
-            id="zipCode"
-            value={address.zipCode}
-            onChange={(e) =>
-              setAddress((prev) => ({ ...prev, zipCode: e.target.value }))
-            }
-            required
-          />
-        </div>
-        {photoURL && <img src={photoURL} alt="Profile" width="100" height="100" />}
-
-        <button type="submit" disabled={loading}>
-          {loading ? 'Aktualizowanie...' : 'Zaktualizuj profil'}
-        </button>
-
-        <div className="order-link">
-        <p>Chcesz zobaczyć swoje zamówienia? <Link href="/protected/user/orders">Kliknij tutaj</Link></p>
+      {user.photoURL && (
+          <div className="avatar">
+            <img src={user.photoURL} alt="Profile" className='avatar-photo'/>
+          </div>
+        )}
+      <div className="profile-details">
+        <p><strong>Nazwa użytkownika:</strong> {user.displayName || 'Brak nazwy'}</p>
+        <p><strong>E-mail:</strong> {user.email}</p>
+        
+        {/* Dodaj inne dane użytkownika, jeśli są dostępne */}
       </div>
-      </form>
+      
+      <div className="order-link">
+        <Link href="/protected/user/orders">Twoje zamówienia</Link>
+      </div>
+      <div>
+        <button >
+            <Link href="/protected/user/profile/edit">Edytuj profil</Link>
+        </button>
+      </div>
+      
+      {alertMessage && (
+        <div className={`custom-alert ${hideAlert ? 'hide' : ''}`}>
+          {alertMessage}
+        </div>
+      )}
     </div>
-    
   );
 }
