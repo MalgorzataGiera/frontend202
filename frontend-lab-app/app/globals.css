@@ -3,19 +3,265 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
+  --background: #edeae4;
   --foreground: #171717;
+  --primary: #a5d1c1;
+  --primaty-light: #e9f2ef;
+  --secondary: #8bb3a4;
 }
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
+} */
 
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* Kontener layoutu */
+.layout-container {
+  display: flex;
+  height: 100vh; /* Ustawia wysokość na pełną wysokość ekranu */
+}
+
+.layout-container.collapsed .header {
+  left: 60px;
+  width: calc(100% - 60px);
+}
+
+.layout-container.collapsed .main-content { 
+  margin-left: 60px;
+}
+
+/* Stylowanie sidebaru */
+.sidebar {
+  /* width: 250px; */
+  /* background-color: var(--secondary);
+  color: #fff;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column; */
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px;
+  height: 100vh;
+  background-color: var(--secondary);
+  color: white;
+  padding-top: 60px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease;
+  padding-left: 10px;
+}
+
+/* Przycisk do rozwijania/zamykania sidebaru */
+.toggle-button {
+  position: absolute;
+  top: 10px;
+  right: -20px;
+  width: 30px;
+  height: 30px;
+  background-color: var(--secondary);
+  color: white;
+  border: none;
+  cursor: pointer;
+  z-index: 95;
+  transition: all 0.3s ease;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar li {
+  margin-bottom: 15px;
+}
+
+.sidebar a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s;
+}
+
+.sidebar a:hover {
+  background-color: #34495e;
+  padding-left: 10px; /* Daje efekt przesunięcia przy najechaniu */
+}
+
+.icon {
+  margin-right: 10px;
+  font-size: 20px;
+}
+
+.sidebar.collapsed {
+  background-color: var(--secondary);
+  width: 60px; /* Zwinięta szerokość */
+  padding-left: 10px;
+}
+
+
+
+/* .sidebar.collapsed a {
+  justify-content: center;
+} */
+
+.sidebar.collapsed a .icon {
+  margin-right: 0; /* Brak odstępu w wersji zwiniętej */
+}
+
+.sidebar.collapsed a span:not(:first-child) {
+  display: none; /* Ukryj tekst w wersji zwiniętej */
+}
+
+/* Stylowanie głównej zawartości */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0px;
+  margin-left: 250px;
+  margin-top: 60px;
+}
+
+.header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 0;
+  background-color: var(--primary);
+  position: fixed;
+  z-index: 90;
+  left: 250px;
+  width: calc(100% - 250px);
+}
+
+.auth-links a {
+  margin-left: 20px;
+  margin-right: 20px;
+  color: white;
+  text-decoration: none;
+  font-size: 18px;
+}
+
+.auth-links a:hover {
+  text-decoration: underline;
+}
+
+/* Stopka */
+.footer {
+  background-color: var(--primary);
+  color: #fff;
+  text-align: center;
+  padding: 10px 0;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+}
+
+
+/* ----------------------------------------- */
+/* Global styles for the form */
+.form-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #2b2525;
+}
+
+/* Styling for the input fields */
+.input-group {
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.input-group input{
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: var(--primaty-light);
+}
+
+.input-group input:focus {
+  border-color: var(--secondary);
+  outline: none;
+}
+
+/* Error message styles */
+.error {
+  color: #d9534f;
+  background-color: #f8d7da;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* Button styling */
+button {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: var(--secondary);
+}
+
+button:disabled {
+  background-color: #c0c0c0;
+  cursor: not-allowed;
+}
+
+/* Loader styles */
+div {
+  text-align: center;
+  font-size: 16px;
+  color: #333;
 }

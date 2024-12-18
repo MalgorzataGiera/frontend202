@@ -4,6 +4,7 @@ import { useAuth } from '@/app/_lib/AuthContext';
 import { useRouter } from 'next/navigation';
 
 
+
 export default function Home() {
   const { user } = useAuth();
   const router = useRouter();
@@ -11,7 +12,6 @@ export default function Home() {
   // Jeśli użytkownik nie jest zalogowany, przekieruj go na stronę logowania
   if (!user) {
     // router.push('/login');
-    console.log('nie zalogowano - home')
   }
 
   return (
