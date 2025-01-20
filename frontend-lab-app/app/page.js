@@ -45,7 +45,7 @@ export default function Home() {
       <h2>Available Products</h2>
       <div className="grid">
         {products.map((product) => (
-          <div key={product.productId} className="card">
+          <div key={product.id} className="card">
             <img src={product.ImgLink} alt={product.Name} className="image" />
             <h3>{product.Name}</h3>
             <p>
