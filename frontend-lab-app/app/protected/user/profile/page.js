@@ -4,6 +4,7 @@ import { useAuth } from '@/app/_lib/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import './profile.css'
+import '@/app/globals.css'
 
 export default function Profile() {
   const { user } = useAuth();

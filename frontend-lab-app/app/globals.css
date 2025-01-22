@@ -266,3 +266,23 @@ div {
   font-size: 16px;
   color: #333;
 }
+
+
+.custom-alert {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--primary);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  font-size: 16px;
+  opacity: 1;
+  transition: opacity 1s ease-out;
+  z-index: 1000;
+}
+
+.custom-alert.hide {
+  opacity: 0;
+}
