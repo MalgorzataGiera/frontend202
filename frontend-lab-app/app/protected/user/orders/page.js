@@ -11,7 +11,7 @@ export default function Orders() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-
+    console.log(user);
     if (!user) {
       setLoading(false);
       setError('Musisz być zalogowany, aby zobaczyć swoje zamówienia.');

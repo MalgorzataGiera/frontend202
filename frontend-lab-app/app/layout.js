@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from '@/app/_lib/AuthContext';
 import './globals.css';
 import Link from 'next/link';
 import { useState } from 'react';
+import { RiShoppingCartLine } from "react-icons/ri";
 
 export default function Layout({ children }) {
   const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -48,18 +49,22 @@ function AuthLinks() {
   if (user) {
     // Użytkownik jest zalogowany
     return (
-      <Link href="/protected/user/signout">
-        Wyloguj
-      </Link>
+      <div id="top" className="auth-links-container">
+        <Link href="/protected/user/chart" className="auth-link"> 
+          <RiShoppingCartLine/> 
+        </Link>
+        <Link href="/protected/user/signout" className="auth-link">
+          Wyloguj
+        </Link>
+      </div>
     );
   }
 
   // Użytkownik nie jest zalogowany
   return (
-    <div id="top">
-      <Link href="/signin">Logowanie</Link>
-      <Link href="/register">Rejestracja</Link>
-      
+    <div id="top" className="auth-links-container">
+      <Link href="/signin" className="auth-link">Logowanie</Link>
+      <Link href="/register" className="auth-link">Rejestracja</Link>
     </div>
   );
 }

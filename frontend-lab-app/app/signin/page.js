@@ -14,7 +14,7 @@ function SignInForm() {
   const router = useRouter();
   const auth = getAuth();
   const params = useSearchParams();
-  const returnUrl = params.get('returnUrl') || '/protected/user/profile';
+  const returnUrl = params.get('returnUrl') || '/';
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event) => {

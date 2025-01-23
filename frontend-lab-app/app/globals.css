@@ -157,18 +157,6 @@ body {
   width: calc(100% - 250px);
 }
 
-.auth-links a {
-  margin-left: 20px;
-  margin-right: 20px;
-  color: white;
-  text-decoration: none;
-  font-size: 18px;
-}
-
-.auth-links a:hover {
-  text-decoration: underline;
-}
-
 /* Stopka */
 .footer {
   background-color: var(--primary);
@@ -285,4 +273,35 @@ div {
 
 .custom-alert.hide {
   opacity: 0;
+}
+
+
+/* top menu */
+.auth-links-container {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* Odstęp między elementami */
+}
+
+.auth-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: white; /* Dziedziczy kolor tekstu */
+  margin-left: 20px;
+  margin-right: 20px;
+  text-decoration: none;
+  font-size: 18px;
+}
+
+
+.auth-link svg {
+  vertical-align: middle; /* Wyrównuje ikonę */
+}
+
+.auth-link:hover {
+  color: var(--secondary); /* Kolor na hover */
+  transition: color 0.3s ease;
+  text-decoration: none;
 }
