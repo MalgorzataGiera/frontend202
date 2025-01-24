@@ -300,7 +300,7 @@ const calculateTotalCost = (items) => {
                 <h4>Produkty powiązane:</h4>
                 {item.relatedProducts?.map((relatedProduct) => (
                 <div key={relatedProduct.id} className="related-product-item">
-                    <img src={item.productDetails?.ImgLink} alt={item.productDetails?.Name} className="product-image small" />
+                    <img src={relatedProduct.ImgLink} alt={relatedProduct.Name} className="product-image small" />
                     {/* <p>{relatedProduct.Name} - {relatedProduct.Price} PLN</p> */}
                     <p>{relatedProduct.Name}</p>
                     <button className="cart-button" onClick={() => handleAddToCart(product.id)} >
