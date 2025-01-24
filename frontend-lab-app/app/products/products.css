@@ -87,6 +87,7 @@ p {
 
 .cart-button:hover {
   background: var(--secondary);
+  
 }
 .cart-button:hover .cart-icon {
   color: var(--background);

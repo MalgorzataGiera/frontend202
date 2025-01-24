@@ -16,6 +16,7 @@ export default function Home() {
   const [alertMessage, setAlertMessage] = useState(null);
   const [hideAlert, setHideAlert] = useState(false);
 
+  // console.log(user.uid);
   useEffect(() => {
     const fetchProducts = async () => {
       try {
