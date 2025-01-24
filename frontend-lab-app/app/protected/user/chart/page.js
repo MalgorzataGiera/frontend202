@@ -322,6 +322,8 @@ const calculateTotalCost = (items) => {
         <p><strong>Do zapłaty: </strong>{totalCost.toFixed(2)} PLN</p>
 
         <div className="promo-code-section">
+          <p>Skorzystaj z kodu: </p> 
+          <p><strong>KwvQqZltVDMkslYFrSj9</strong></p>
             <input
             type="text"
             value={promoCode}

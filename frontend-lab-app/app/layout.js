@@ -35,7 +35,7 @@ export default function Layout({ children }) {
           </div>
 
           <footer className="footer">
-            <p>© 2024 Twoja Aplikacja</p>
+            <p>© 2024</p>
           </footer>
         </body>
       </html>
@@ -85,14 +85,9 @@ function SidebarLinks() {
         </Link>
       </li>
       <li>
-        <Link href="/services">
-          <p className="icon">🛠️</p> <span>Usługi</span>
-        </Link>
-      </li>
-      <li>
-        <Link href="/contact">
-          <p className="icon">📞</p> <span>Kontakt</span>
-        </Link>
+      <Link href="/products">
+        <p className="icon"> 🌻 </p> <span>Zobacz produkty</span>
+      </Link>
       </li>
       {user && (
         <li>

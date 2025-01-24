@@ -5,10 +5,10 @@ export default function Home() {
  
   return (
     <div className="container">
-      <h2>Welcome</h2>
-      <p>Check out our available products:</p>
+      <h2>Sklep ogrodniczy online</h2>
+      <p>Sprawdź nasze dostępne produkty</p>
       <Link href="/products">
-        <button className="products-button">View Products</button>
+        <button className="products-button">Zobacz produkty</button>
       </Link>
     </div>
   );
