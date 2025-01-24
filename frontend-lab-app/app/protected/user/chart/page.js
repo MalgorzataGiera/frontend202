@@ -109,23 +109,61 @@ export default function CartPage() {
     }
   };
 
+  const removeProductFromCart = async (productId) => {
+    // Ustawiamy quantity na 0 zamiast usuwać rekord z bazy danych
+    try {
+      const cartSnapshot = await getDoc(doc(db, 'carts', user.uid));
+      const cartData = cartSnapshot.exists() ? cartSnapshot.data() : null;
 
-  
+      if (cartData) {
+        const productIndex = cartData.productIDList.findIndex(item => item.productID.id === productId);
+
+        if (productIndex !== -1) {
+          const updatedProductList = [...cartData.productIDList];
+          updatedProductList[productIndex] = {
+            ...updatedProductList[productIndex],
+            quantity: 0
+          };
+
+          await updateDoc(doc(db, 'carts', user.uid), {
+            productIDList: updatedProductList
+          });
+
+          // Zaktualizowanie lokalnego stanu (ukrywa produkt na ekranie)
+          setCartItems(prevItems => prevItems.filter(item => item.productID.id !== productId));
+        } else {
+          console.log("Produkt nie istnieje w koszyku");
+        }
+      } else {
+        console.error("Koszyk nie istnieje");
+      }
+    } catch (error) {
+      console.error('Błąd przy usuwaniu produktu:', error);
+      setError('Wystąpił błąd przy usuwaniu produktu z koszyka');
+    }
+  };
+
+  const visibleCartItems = cartItems.filter(item => item.quantity > 0);
+
   if (loading) {
     return <div>Ładowanie koszyka...</div>;
   }
+
   if (error) {
     return <div className="error">{error}</div>;
   }
-  if (cartItems.length === 0) {
+
+  if (visibleCartItems.length === 0) {
     return <div>Twój koszyk jest pusty.</div>;
   }
+
+
   return (
     <div className="cart-container">
       <h2>Twój koszyk</h2>
       {error && <p className="error">{error}</p>}
       {<form>
-        {cartItems.map((item, index) => (
+        {visibleCartItems.map((item, index) => (
           <div key={item.id || index} className="cart-item">
             <div className="product-info">
               <img src={item.productDetails?.ImgLink} alt={item.productDetails?.Name} className="product-image" />
@@ -145,6 +183,7 @@ export default function CartPage() {
                 <p><strong>Łączna cena:</strong> {item.productID.Price * item.quantity} PLN</p>
               </div>
             </div>
+            <button type="button" className='remove-button' onClick={() => removeProductFromCart(item.productID.id)}>x</button>
           </div>
         ))}
         <div className="cart-actions">
