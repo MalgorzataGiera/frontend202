@@ -30,6 +30,10 @@
     background-color: var(--primaty-light);
     border-radius: 8px;
   }
+
+  .cart-item:hover {
+    transform: scale(1.05);
+  }
   
   .cart-item:last-child {
     border-bottom: none;
@@ -41,15 +45,17 @@
   }
   
   .product-image {
-    max-width: 120px;
+    /* max-width: 120px; */
     margin-right: 20px;
     border-radius: 8px;
+
+    justify-content: center;
+    align-items: center;
+    width: 100px;
+    height: 100px;
+    overflow: hidden;
   }
-  
-  .product-details {
-    max-width: 600px;
-  }
-  
+   
   .product-details h3 {
     font-size: 18px;
     font-weight: bold;

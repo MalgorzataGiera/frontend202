@@ -15,10 +15,10 @@ export default function CartPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!user) {
-      router.push('/signin');
-      return;
-    }
+    // if (!user) {
+    //   router.push('/signin');
+    //   return;
+    // }
 
     if(user) {
     const fetchCart = async () => {
@@ -26,14 +26,22 @@ export default function CartPage() {
         const cartSnapshot = await getDoc(doc(db, 'carts', user.uid)); 
 
         if (cartSnapshot.exists()) {
-            const data = cartSnapshot.data();
-            const products = data.productIDList;
-      
-            if (Array.isArray(products)) {
-              setCartItems(products); 
-            } else {
-              console.error('Expected an array of products, but got:', products);
-              setError('Brak danych w koszyku');
+            const cartData = cartSnapshot.data();
+          
+          // Check if productIDList exists and is an array
+          if (Array.isArray(cartData.productIDList)) {
+            const productPromises = cartData.productIDList.map(async (item) => {
+              const productRef = doc(db, 'products', item.productID.id); // Resolving the DocumentReference to get product data
+              const productSnapshot = await getDoc(productRef);
+              const productData = productSnapshot.exists() ? productSnapshot.data() : null;
+              return {
+                ...item,
+                productDetails: productData,
+              };
+            });
+
+            const resolvedProducts = await Promise.all(productPromises);
+            setCartItems(resolvedProducts);
             }
         } else {
             console.log('Brak danych użytkownika');
@@ -74,10 +82,10 @@ export default function CartPage() {
         {cartItems.map((item) => (
           <div key={item.id} className="cart-item">
             <div className="product-info">
-              <img src={item.productID.ImgLink} alt={item.productID.Name} className="product-image" />
+              <img src={item.productDetails?.ImgLink} alt={item.productDetails?.Name} className="product-image" />
               <div className="product-details">
-                <h3>{item.productID.Name}</h3>
-                <p><strong>Cena:</strong> {item.productID.Price} PLN</p>
+                <h3>{item.productDetails?.Name}</h3>
+                <p>Cena: {item.productDetails?.Price} PLN</p>
                 <div className="cart-input-group">
                   <label htmlFor={`quantity-${item.id}`}>Ilość:</label>
                   <input
@@ -88,7 +96,7 @@ export default function CartPage() {
                     onChange={(e) => updateProductQuantity(item.id, parseInt(e.target.value))}
                   />
                 </div>
-                <p><strong>Łączna cena:</strong> {item.productID.Price * item.quantity} PLN</p>
+                <p><strong>Łączny koszt: {item.productDetails?.Price * item.quantity} PLN </strong> </p>
               </div>
             </div>
           </div>
