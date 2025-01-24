@@ -7,12 +7,27 @@ import { db } from '@/app/_lib/firebase';
 import Link from 'next/link';
 import './cart.css'; // Dodaj odpowiednie style CSS
 
+
+  
 export default function CartPage() {
   const { user } = useAuth(); 
   const [cartItems, setCartItems] = useState([]); 
   const [error, setError] = useState(''); 
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  const [promoCode, setPromoCode] = useState('');
+  const [discount, setDiscount] = useState(0); 
+  const [totalCost, setTotalCost] = useState(0);
+  const [alertMessage, setAlertMessage] = useState(null);
+  const [hideAlert, setHideAlert] = useState(false);
+
+  const showToast = (message) => {
+    setAlertMessage(message);
+    setHideAlert(false);
+    setTimeout(() => setAlertMessage(null), 3000); // Remove alert after 3 seconds
+  };
+
   useEffect(() => {
     if (!user) {
     //   router.push('/signin');
@@ -40,6 +55,7 @@ export default function CartPage() {
             });
             const resolvedProducts = await Promise.all(productPromises);
             setCartItems(resolvedProducts);
+            calculateTotalCost(resolvedProducts);
             }
         } else {
             console.log('Brak danych użytkownika');
@@ -156,7 +172,8 @@ export default function CartPage() {
         }));
 
         await updateDoc(doc(db, 'carts', user.uid), {
-          productIDList: updatedProductList
+          productIDList: updatedProductList,
+          promoCode: '0000promocode0000'
         });
 
         // Zaktualizuj stan w aplikacji
@@ -169,6 +186,56 @@ export default function CartPage() {
   };
 
   const visibleCartItems = cartItems.filter(item => item.quantity > 0);
+
+//   const totalCost = visibleCartItems.reduce((total, item) => {
+//     return total + (item.productDetails?.Price * item.quantity);
+//   }, 0);
+const calculateTotalCost = (items) => {
+    const total = items.reduce((sum, item) => sum + item.productDetails.Price * item.quantity, 0);
+    setTotalCost(total);
+  };
+
+  const applyPromoCode = async () => {
+    try {
+        // Pobierz koszyk użytkownika
+        const cartRef = doc(db, 'carts', user.uid);
+        const cartSnapshot = await getDoc(cartRef);
+    
+        if (cartSnapshot.exists()) {
+          const cartData = cartSnapshot.data();
+          console.log(cartData.promoCode);
+    
+          // Sprawdź, czy kod promocyjny już został użyty
+          if (cartData.promoCode && cartData.promoCode!== '0000promocode0000') {
+            // setError('Kod promocyjny został już zastosowany.');
+            showToast("Kod promocyjny został już zastosowany");
+            return;
+          }
+    
+          // Sprawdź, czy kod promocyjny istnieje w kolekcji `promoCodes`
+          const promoSnapshot = await getDoc(doc(db, 'promoCodes', promoCode));
+          if (promoSnapshot.exists()) {
+            // Zastosowanie zniżki
+            setDiscount(0.1); // Zakładamy 10% rabatu
+            setError(''); // Wyczyszczenie błędu
+            const newTotalCost = totalCost * 0.9; // Obniżenie kosztu o 10%
+            setTotalCost(newTotalCost);
+    
+            // Aktualizuj koszyk z użytym kodem promocyjnym
+            await updateDoc(cartRef, {
+              promoCode: promoCode,
+            });
+          } else {
+            showToast('Niepoprawny kod promocyjny.');
+          }
+        } else {
+          setError('Koszyk nie istnieje.');
+        }
+      } catch (error) {
+        console.error('Błąd przy stosowaniu kodu promocyjnego:', error);
+        showToast('Wystąpił błąd przy stosowaniu kodu promocyjnego.');
+      }
+    };
 
   if (loading) {
     return <div>Ładowanie koszyka...</div>;
@@ -187,38 +254,59 @@ export default function CartPage() {
     <div className="cart-container">
       <h2>Twój koszyk</h2>
       {error && <p className="error">{error}</p>}
-      {<form>
-        {visibleCartItems.map((item, index) => (
-          <div key={item.id || index} className="cart-item">
-            <div className="product-info">
-              <img src={item.productDetails?.ImgLink} alt={item.productDetails?.Name} className="product-image" />
-              <div className="product-details">
-                <h3>{item.productDetails?.Name}</h3>
-                <p><strong>Cena:</strong> {item.productDetails?.Price} PLN</p>
-                <div className="cart-input-group">
-                  <label htmlFor={`quantity-${item.id}`}>Ilość:</label>
-                  <input
-                    type="number"
-                    id={`quantity-${item.id}`}
-                    value={item.quantity}
-                    min="1"
-                    onChange={(e) => (updateProductQuantity(item.productID.id, e.target.value))}
-                  />
+      <div className='main-cart'>
+        {<form>
+            {visibleCartItems.map((item, index) => (
+            <div key={item.id || index} className="cart-item">
+                <div className="product-info">
+                <img src={item.productDetails?.ImgLink} alt={item.productDetails?.Name} className="product-image" />
+                <div className="product-details">
+                    <h3>{item.productDetails?.Name}</h3>
+                    <p><strong>Cena:</strong> {item.productDetails?.Price} PLN</p>
+                    <div className="cart-input-group">
+                    <label htmlFor={`quantity-${item.id}`}>Ilość:</label>
+                    <input
+                        type="number"
+                        id={`quantity-${item.id}`}
+                        value={item.quantity}
+                        min="1"
+                        onChange={(e) => (updateProductQuantity(item.productID.id, e.target.value))}
+                    />
+                    </div>
+                    <p><strong>Łączna kwota:</strong> {item.productID.Price * item.quantity} PLN</p>
                 </div>
-                <p><strong>Łączna cena:</strong> {item.productID.Price * item.quantity} PLN</p>
-              </div>
+                </div>
+                <button type="button" className='remove-button' onClick={() => removeProductFromCart(item.productID.id)}>x</button>
             </div>
-            <button type="button" className='remove-button' onClick={() => removeProductFromCart(item.productID.id)}>x</button>
-          </div>
-        ))}
-        <div className="cart-actions">
-          <button type="button" onClick={clearCart}>Wyczyść koszyk</button>
+            ))}
+            <div className="cart-actions">
+            <button type="button" onClick={clearCart}>Wyczyść koszyk</button>          
+            <Link href="/checkout">
+                <button type="button">Podsumowanie</button>
+            </Link>
+            </div>
+        </form> }
 
-          <Link href="/checkout">
-            <button type="button">Podsumowanie</button>
-          </Link>
+        <div className="cart-summary">
+            <p><strong>Do zapłaty: </strong>{totalCost.toFixed(2)} PLN</p>
+
+            <div className="promo-code-section ">
+                <input
+                type="text"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value)}
+                placeholder="Wpisz kod promocyjny"
+                />
+                <button onClick={applyPromoCode}>Zastosuj kod</button>
+
+                {alertMessage && (
+                    <div className={`custom-alert ${hideAlert ? 'hide' : ''}`}>
+                    {alertMessage}
+                    </div>
+                )}
+            </div>
         </div>
-      </form> }
+      </div>
     </div>
   );
 }
