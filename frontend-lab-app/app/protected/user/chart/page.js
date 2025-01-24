@@ -6,7 +6,8 @@ import { getDoc, doc, updateDoc} from 'firebase/firestore';
 import { db } from '@/app/_lib/firebase';
 import Link from 'next/link';
 import './cart.css'; // Dodaj odpowiednie style CSS
-
+import '@/app/products/products.css';
+import { RiShoppingCartLine } from "react-icons/ri";
 
   
 export default function CartPage() {
@@ -41,16 +42,27 @@ export default function CartPage() {
 
         if (cartSnapshot.exists()) {
             const cartData = cartSnapshot.data();
-          
+        
           // Check if productIDList exists and is an array
           if (Array.isArray(cartData.productIDList)) {
             const productPromises = cartData.productIDList.map(async (item) => {
               const productRef = doc(db, 'products', item.productID.id); // Resolving the DocumentReference to get product data
               const productSnapshot = await getDoc(productRef);
-              const productData = productSnapshot.exists() ? productSnapshot.data() : null;
+              const productData = productSnapshot.exists() ? productSnapshot.data() : null; // has array
+
+            // Pobierz powiązane produkty
+            const relatedProducts = await Promise.all(
+            (productData.productID || []).map(async (relatedItem) => {
+              const relatedProductRef = doc(db, 'products', relatedItem.id);
+              const relatedProductSnapshot = await getDoc(relatedProductRef);
+              return relatedProductSnapshot.exists() ? relatedProductSnapshot.data() : null;
+            })
+
+          );
               return {
                 ...item,
                 productDetails: productData,
+                relatedProducts: relatedProducts.filter(Boolean)
               };
             });
             const resolvedProducts = await Promise.all(productPromises);
@@ -252,61 +264,81 @@ const calculateTotalCost = (items) => {
 
   return (
     <div className="cart-container">
-      <h2>Twój koszyk</h2>
-      {error && <p className="error">{error}</p>}
-      <div className='main-cart'>
-        {<form>
-            {visibleCartItems.map((item, index) => (
+    <h2>Twój koszyk</h2>
+    {error && <p className="error">{error}</p>}
+    <div className="main-cart">
+        <form>
+        {visibleCartItems.map((item, index) => (
             <div key={item.id || index} className="cart-item">
-                <div className="product-info">
-                <img src={item.productDetails?.ImgLink} alt={item.productDetails?.Name} className="product-image" />
-                <div className="product-details">
-                    <h3>{item.productDetails?.Name}</h3>
-                    <p><strong>Cena:</strong> {item.productDetails?.Price} PLN</p>
-                    <div className="cart-input-group">
-                    <label htmlFor={`quantity-${item.id}`}>Ilość:</label>
-                    <input
-                        type="number"
-                        id={`quantity-${item.id}`}
-                        value={item.quantity}
-                        min="1"
-                        onChange={(e) => (updateProductQuantity(item.productID.id, e.target.value))}
-                    />
+                <div className='product'>
+                    <div className="product-info">
+                        <img src={item.productDetails?.ImgLink} alt={item.productDetails?.Name} className="product-image" />
+                        <div className="product-details">
+                        <h3>{item.productDetails?.Name}</h3>
+                        <p><strong>Cena:</strong> {item.productDetails?.Price} PLN</p>
+                        <div className="cart-input-group">
+                            <label htmlFor={`quantity-${item.id}`}>Ilość:</label>
+                            <input
+                            type="number"
+                            id={`quantity-${item.id}`}
+                            value={item.quantity}
+                            min="1"
+                            onChange={(e) => updateProductQuantity(item.productID.id, e.target.value)}
+                            />
+                        </div>
+                        <p><strong>Łączna kwota:</strong> {item.productDetails?.Price * item.quantity} PLN</p>
+                        </div>
                     </div>
-                    <p><strong>Łączna kwota:</strong> {item.productID.Price * item.quantity} PLN</p>
+                    <button
+                        type="button"
+                        className="remove-button"
+                        onClick={() => removeProductFromCart(item.productID.id)}
+                    > x </button>
                 </div>
+
+            <div className="related-products">
+                <h4>Produkty powiązane:</h4>
+                {item.relatedProducts?.map((relatedProduct) => (
+                <div key={relatedProduct.id} className="related-product-item">
+                    <img src={item.productDetails?.ImgLink} alt={item.productDetails?.Name} className="product-image small" />
+                    {/* <p>{relatedProduct.Name} - {relatedProduct.Price} PLN</p> */}
+                    <p>{relatedProduct.Name}</p>
+                    <button className="cart-button" onClick={() => handleAddToCart(product.id)} >
+                        <RiShoppingCartLine className="cart-icon small" />
+                    </button>
                 </div>
-                <button type="button" className='remove-button' onClick={() => removeProductFromCart(item.productID.id)}>x</button>
+                ))}
             </div>
-            ))}
-            <div className="cart-actions">
-            <button type="button" onClick={clearCart}>Wyczyść koszyk</button>          
-            <Link href="/checkout">
-                <button type="button">Podsumowanie</button>
-            </Link>
             </div>
-        </form> }
+        ))}
+        </form>
+
+        
+        {/* <Link href="/checkout">
+            <button type="button">Podsumowanie</button>
+        </Link> */}
 
         <div className="cart-summary">
-            <p><strong>Do zapłaty: </strong>{totalCost.toFixed(2)} PLN</p>
+        <p><strong>Do zapłaty: </strong>{totalCost.toFixed(2)} PLN</p>
 
-            <div className="promo-code-section ">
-                <input
-                type="text"
-                value={promoCode}
-                onChange={(e) => setPromoCode(e.target.value)}
-                placeholder="Wpisz kod promocyjny"
-                />
-                <button onClick={applyPromoCode}>Zastosuj kod</button>
+        <div className="promo-code-section">
+            <input
+            type="text"
+            value={promoCode}
+            onChange={(e) => setPromoCode(e.target.value)}
+            placeholder="Wpisz kod promocyjny"
+            />
+            <button onClick={applyPromoCode}>Zastosuj kod</button>
 
-                {alertMessage && (
-                    <div className={`custom-alert ${hideAlert ? 'hide' : ''}`}>
-                    {alertMessage}
-                    </div>
-                )}
+            {alertMessage && (
+            <div className={`custom-alert ${hideAlert ? 'hide' : ''}`}>
+                {alertMessage}
             </div>
+            )}
         </div>
-      </div>
+        </div>
     </div>
-  );
+    <button type="button" onClick={clearCart}>Wyczyść koszyk</button>
+    </div>
+    );
 }
