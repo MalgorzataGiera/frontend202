@@ -15,22 +15,31 @@ export default function CartPage() {
   const router = useRouter();
   useEffect(() => {
     if (!user) {
-      router.push('/signin');
+    //   router.push('/signin');
       return;
     }
+
     if(user) {
     const fetchCart = async () => {
       try {
         const cartSnapshot = await getDoc(doc(db, 'carts', user.uid)); 
+
         if (cartSnapshot.exists()) {
-            const data = cartSnapshot.data();
-            const products = data.productIDList;
-      
-            if (Array.isArray(products)) {
-              setCartItems(products); 
-            } else {
-              console.error('Expected an array of products, but got:', products);
-              setError('Brak danych w koszyku');
+            const cartData = cartSnapshot.data();
+          
+          // Check if productIDList exists and is an array
+          if (Array.isArray(cartData.productIDList)) {
+            const productPromises = cartData.productIDList.map(async (item) => {
+              const productRef = doc(db, 'products', item.productID.id); // Resolving the DocumentReference to get product data
+              const productSnapshot = await getDoc(productRef);
+              const productData = productSnapshot.exists() ? productSnapshot.data() : null;
+              return {
+                ...item,
+                productDetails: productData,
+              };
+            });
+            const resolvedProducts = await Promise.all(productPromises);
+            setCartItems(resolvedProducts);
             }
         } else {
             console.log('Brak danych użytkownika');
@@ -49,59 +58,44 @@ export default function CartPage() {
  }, [user, router]);
 
  const updateProductQuantity = async (productId, newQuantity) => {
-    // Ensure that quantity is a valid positive number
     if (newQuantity <= 0) {
       setError('Ilość musi być większa niż 0.');
       return;
     }
   
-    // Update the local state to immediately reflect the change
+    // aktualizacjana ekranie
     setCartItems(prevItems => prevItems.map(item =>
-      item.id === productId ? { ...item, quantity: newQuantity } : item
+      item.productID.id === productId ? { ...item, quantity: newQuantity } : item
     ));
-  
+
     try {
-      // Fetch the user's cart from Firebase
       const cartSnapshot = await getDoc(doc(db, 'carts', user.uid));
       const cartData = cartSnapshot.exists() ? cartSnapshot.data() : null;
-      console.log(cartData);
   
       if (cartData) {
-        // Check if the product already exists in the cart
+        // czy produkt już istnieje w koszyku
         const productIndex = cartData.productIDList.findIndex(item => item.productID.id === productId);
   
         if (productIndex !== -1) {
-          // If the product exists, update its quantity
+          // zaktualizuj ilość
           const updatedProductList = [...cartData.productIDList];
           updatedProductList[productIndex] = {
             ...updatedProductList[productIndex],
             quantity: newQuantity
           };
   
-          // Ensure the product details are valid and not undefined
-          if (!updatedProductList[productIndex].productID || updatedProductList[productIndex].quantity === undefined) {
-            throw new Error('Niepoprawne dane produktu w koszyku');
-          }
-  
-          // Update the cart in Firebase
           await updateDoc(doc(db, 'carts', user.uid), {
             productIDList: updatedProductList
           });
         } else {
-          // If the product doesn't exist, add it to the cart
+          // Jeśli produkt nie istnieje, dodaj go do koszyka
           const newProduct = {
             productID: { id: productId },
             quantity: newQuantity
           };
   
-          // Ensure the new product data is valid
-          if (!newProduct.productID || newProduct.quantity === undefined) {
-            throw new Error('Niepoprawne dane produktu');
-          }
-  
           const updatedProductList = [...cartData.productIDList, newProduct];
   
-          // Update the cart in Firebase
           await updateDoc(doc(db, 'carts', user.uid), {
             productIDList: updatedProductList
           });
@@ -114,6 +108,7 @@ export default function CartPage() {
       setError('Wystąpił błąd przy aktualizacji ilości produktu');
     }
   };
+
 
   
   if (loading) {
@@ -133,10 +128,10 @@ export default function CartPage() {
         {cartItems.map((item, index) => (
           <div key={item.id || index} className="cart-item">
             <div className="product-info">
-              <img src={item.productID.ImgLink} alt={item.productID.Name} className="product-image" />
+              <img src={item.productDetails?.ImgLink} alt={item.productDetails?.Name} className="product-image" />
               <div className="product-details">
-                <h3>{item.productID.Name}</h3>
-                <p><strong>Cena:</strong> {item.productID.Price} PLN</p>
+                <h3>{item.productDetails?.Name}</h3>
+                <p><strong>Cena:</strong> {item.productDetails?.Price} PLN</p>
                 <div className="cart-input-group">
                   <label htmlFor={`quantity-${item.id}`}>Ilość:</label>
                   <input
