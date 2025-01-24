@@ -143,6 +143,31 @@ export default function CartPage() {
     }
   };
 
+  const clearCart = async () => {
+    try {
+      const cartSnapshot = await getDoc(doc(db, 'carts', user.uid));
+      const cartData = cartSnapshot.exists() ? cartSnapshot.data() : null;
+
+      if (cartData) {
+        // Zaktualizuj quantity każdego produktu na 0
+        const updatedProductList = cartData.productIDList.map(item => ({
+          ...item,
+          quantity: 0
+        }));
+
+        await updateDoc(doc(db, 'carts', user.uid), {
+          productIDList: updatedProductList
+        });
+
+        // Zaktualizuj stan w aplikacji
+        setCartItems(updatedProductList);
+      }
+    } catch (error) {
+      console.error('Błąd przy czyszczeniu koszyka:', error);
+      setError('Wystąpił błąd przy czyszczeniu koszyka');
+    }
+  };
+
   const visibleCartItems = cartItems.filter(item => item.quantity > 0);
 
   if (loading) {
@@ -177,7 +202,7 @@ export default function CartPage() {
                     id={`quantity-${item.id}`}
                     value={item.quantity}
                     min="1"
-                    onChange={(e) => (updateProductQuantity(item.productID.id, e.target.value)/*console.log(item.productID.id, parseInt(e.target.value)*/)}
+                    onChange={(e) => (updateProductQuantity(item.productID.id, e.target.value))}
                   />
                 </div>
                 <p><strong>Łączna cena:</strong> {item.productID.Price * item.quantity} PLN</p>
@@ -187,6 +212,8 @@ export default function CartPage() {
           </div>
         ))}
         <div className="cart-actions">
+          <button type="button" onClick={clearCart}>Wyczyść koszyk</button>
+
           <Link href="/checkout">
             <button type="button">Podsumowanie</button>
           </Link>

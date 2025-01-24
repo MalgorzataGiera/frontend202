@@ -88,19 +88,23 @@
   .cart-actions {
     margin-top: 30px;
     text-align: center;
+    display: flex;
+    justify-content: center;
+
   }
   
   .cart-actions button {
-    padding: 10px 20px;
+    padding: 10px 10px;
+    margin: 0 50px;
     font-size: 16px;
-    background-color: #007bff;
+    background-color: var(--primary);
     color: #fff;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s;
   }
-  
+
   .cart-actions button:hover {
     background-color: var(--primary);
   }
@@ -114,19 +118,9 @@
   .cart-item .product-details .cart-input-group {
     display: flex;
     margin-right: 10px;
-    align-items: center;
   }
   
-  .cart-actions button {
-    display: flex;
-    align-items: center;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    width: auto;
-    background: var(--primary);
-  }
+  
   
   .remove-button {
     padding: 5px 10px;
